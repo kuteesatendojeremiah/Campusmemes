@@ -1,8 +1,10 @@
+import { connection } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { Card, H1, Table, btnCls, fmtDate, ghostBtn, inputCls } from "@/components/admin-ui";
 import { userAction } from "../actions";
 
 export default async function Users({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  await connection();
   const { db } = await requireAdmin();
   const { q = "" } = await searchParams;
   let query = db.from("profiles").select("id,alias,avatar,status,suspended_until,is_premium,created_at").order("created_at", { ascending: false }).limit(50);

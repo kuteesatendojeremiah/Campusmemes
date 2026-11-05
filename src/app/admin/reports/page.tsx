@@ -1,8 +1,10 @@
+import { connection } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { sponsorReports } from "@/lib/sponsor-report";
 import { Card, H1, Table, btnCls } from "@/components/admin-ui";
 
 export default async function Reports() {
+  await connection();
   const { db } = await requireAdmin();
   const rows = await sponsorReports(db);
   return (

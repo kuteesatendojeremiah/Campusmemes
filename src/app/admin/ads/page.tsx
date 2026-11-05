@@ -1,8 +1,10 @@
+import { connection } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { Card, H1, Table, btnCls, fmtDate, ghostBtn, inputCls } from "@/components/admin-ui";
 import { addAd, toggleAd } from "../actions";
 
 export default async function Ads() {
+  await connection();
   const { db } = await requireAdmin();
   const [{ data: ads }, { data: sponsors }, { data: topics }, { data: events }] = await Promise.all([
     db.from("feed_ads").select("id,title,link_url,starts_at,ends_at,active,sponsor:sponsors(name)").order("starts_at", { ascending: false }),

@@ -1,8 +1,10 @@
+import { connection } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { Card, H1, Table, btnCls, ghostBtn, inputCls } from "@/components/admin-ui";
 import { addSponsor, toggleSponsor } from "../actions";
 
 export default async function Sponsors() {
+  await connection();
   const { db } = await requireAdmin();
   const { data: sponsors } = await db.from("sponsors").select("id,name,logo_url,link_url,category,active").order("created_at", { ascending: false });
   return (

@@ -1,8 +1,10 @@
+import { connection } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { Card, H1, btnCls, fmtDate, ghostBtn, inputCls } from "@/components/admin-ui";
 import { addCampaign, inviteCreator } from "../actions";
 
 export default async function Campaigns() {
+  await connection();
   const { db } = await requireAdmin();
   const { data: campaigns } = await db
     .from("campaigns")

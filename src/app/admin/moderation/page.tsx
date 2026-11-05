@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { Card, H1, Table, fmtDate, ghostBtn } from "@/components/admin-ui";
 import { moderate } from "../actions";
@@ -5,6 +6,7 @@ import { moderate } from "../actions";
 type Item = { id: string; kind: "meme" | "comment"; status: string; author: string; preview: React.ReactNode; reasons: string[] };
 
 export default async function Moderation() {
+  await connection();
   const { db } = await requireAdmin();
   const [{ data: reports }, { data: log }] = await Promise.all([
     db

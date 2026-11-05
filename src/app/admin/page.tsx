@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { Card, H1, Stat, Table } from "@/components/admin-ui";
 
@@ -9,6 +10,7 @@ const count = (rows: { created_at: string }[], fmt: (s: string) => string) => {
 };
 
 export default async function Overview() {
+  await connection();
   const { db } = await requireAdmin();
   const since7 = new Date(Date.now() - 7 * 86_400_000).toISOString();
   const startToday = new Date(new Date().toISOString().slice(0, 10)).toISOString();

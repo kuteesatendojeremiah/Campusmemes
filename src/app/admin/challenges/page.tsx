@@ -1,8 +1,10 @@
+import { connection } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { Card, H1, Table, btnCls, fmtDate, inputCls } from "@/components/admin-ui";
 import { addChallenge } from "../actions";
 
 export default async function Challenges() {
+  await connection();
   const { db } = await requireAdmin();
   const [{ data: challenges }, { data: sponsors }, { data: templates }, { data: entries }] = await Promise.all([
     db.from("challenges").select("id,title,starts_at,ends_at,prize,finalized_at,sponsor:sponsors(name)").order("starts_at", { ascending: false }),

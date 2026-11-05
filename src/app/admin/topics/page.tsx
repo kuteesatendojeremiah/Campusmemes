@@ -1,8 +1,10 @@
+import { connection } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { Card, H1, Table, btnCls, ghostBtn, inputCls } from "@/components/admin-ui";
 import { addTopic, toggleTopic } from "../actions";
 
 export default async function Topics() {
+  await connection();
   const { db } = await requireAdmin();
   const { data: topics } = await db.from("topics").select("id,name,emoji,description,active").order("name");
   return (

@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { Card, H1, btnCls, ghostBtn, inputCls } from "@/components/admin-ui";
 import { addBlockword, removeBlockword, saveSettings } from "../actions";
@@ -20,6 +21,7 @@ const NUMBERS: [string, string][] = [
 ];
 
 export default async function Settings() {
+  await connection();
   const { db } = await requireAdmin();
   const [{ data: settings }, { data: words }] = await Promise.all([db.from("settings").select("key,value"), db.from("blocklist").select("word").order("word")]);
   const v = new Map((settings ?? []).map((s) => [s.key, s.value]));

@@ -1,7 +1,9 @@
+import { connection } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { Card, H1, Table, fmtDate } from "@/components/admin-ui";
 
 export default async function Payments() {
+  await connection();
   const { db } = await requireAdmin();
   const { data } = await db.from("ledger").select("id,kind,amount,provider,provider_ref,status,created_at,user:profiles!user_id(alias)").order("created_at", { ascending: false }).limit(200);
   return (

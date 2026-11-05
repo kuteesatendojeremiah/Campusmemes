@@ -1,8 +1,10 @@
+import { connection } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { Card, H1, Table, btnCls, fmtDate, ghostBtn, inputCls } from "@/components/admin-ui";
 import { addPack, addSticker, addTemplate, toggleTemplate } from "../actions";
 
 export default async function Templates() {
+  await connection();
   const { db } = await requireAdmin();
   const [{ data: templates }, { data: sponsors }, { data: packs }] = await Promise.all([
     db.from("templates").select("id,name,image_url,uses_count,active,premium_only,sponsored_from,sponsored_until,sponsor:sponsors(name)").order("created_at", { ascending: false }),
