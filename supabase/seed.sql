@@ -11,11 +11,11 @@ insert into public.topics (slug, name, description, emoji) values
 insert into public.sponsors (name, link_url, category) values
   ('Sample Rolex Stand (placeholder sponsor)', 'https://example.com', 'food');
 
--- 20 placeholder templates (coloured placeholders; replace with real images in the assets bucket)
+-- 20 text-free starter backgrounds (solid / gradient / stripes / dots in 5 colours), served from /public/templates.
+-- Replace or add real meme templates in Admin > Templates & stickers.
 insert into public.templates (name, image_url)
-select 'Placeholder template ' || n,
-       'https://placehold.co/600x600/' || (array['4B1FA8','FFD23F','16A34A','F97316','0EA5E9'])[1 + n % 5] || '/white?text=Template+' || n
-from generate_series(1, 20) n;
+select initcap(c) || ' ' || s, '/templates/' || c || '-' || s || '.svg'
+from unnest(array['purple','yellow','green','orange','blue']) c, unnest(array['solid','gradient','stripes','dots']) s;
 
 insert into public.challenges (title, description, starts_at, ends_at, prize, sponsor_id)
 select 'Dead Semester Week', 'Show us how dead semester really feels. Top 3 get featured on Home.',
