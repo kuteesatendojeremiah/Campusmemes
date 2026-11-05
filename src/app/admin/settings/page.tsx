@@ -20,8 +20,9 @@ const NUMBERS: [string, string][] = [
   ["reports_to_autohide", "Reports needed to auto-hide a post"],
 ];
 
-export default async function Settings() {
+export default async function Settings({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
   await connection();
+  const { saved } = await searchParams;
   const { db } = await requireAdmin();
   const [{ data: settings }, { data: words }] = await Promise.all([db.from("settings").select("key,value"), db.from("blocklist").select("word").order("word")]);
   const v = new Map((settings ?? []).map((s) => [s.key, s.value]));
@@ -29,6 +30,11 @@ export default async function Settings() {
   return (
     <>
       <H1>Settings</H1>
+      {saved && (
+        <p className={`mb-3 rounded-lg p-3 font-semibold ${saved === "error" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-800"}`}>
+          {saved === "error" ? "Could not save. Try again." : saved === "none" ? "Saved. Nothing had changed." : `Saved. ${saved} setting${saved === "1" ? "" : "s"} changed.`}
+        </p>
+      )}
       <Card title="Revenue switches and numbers">
         <form action={saveSettings} className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">

@@ -1,5 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireAdmin, logAction, BLOCKED_SPONSOR_WORDS } from "@/lib/admin";
 
 const s = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
@@ -193,15 +194,33 @@ export async function inviteCreator(f: FormData) {
 const SWITCHES = ["feature_sponsored_challenges", "feature_branded_templates", "feature_feed_ads", "feature_premium", "feature_tips", "feature_campaigns"];
 const NUMBERS = ["tip_fee_percent", "premium_price_ugx", "ad_every_n_memes", "max_posts_per_day", "max_comments_per_day", "reports_to_autohide"];
 
+// Allowed range for each number, so a typo can't break pricing or posting.
+const LIMITS: Record<string, [number, number]> = {
+  tip_fee_percent: [0, 50],
+  premium_price_ugx: [500, 1_000_000],
+  ad_every_n_memes: [3, 100],
+  max_posts_per_day: [1, 200],
+  max_comments_per_day: [1, 1000],
+  reports_to_autohide: [1, 50],
+};
+
 export async function saveSettings(f: FormData) {
   const { db, adminId } = await requireAdmin();
+  const { data: before } = await db.from("settings").select("key,value");
+  const old = new Map((before ?? []).map((r) => [r.key as string, r.value]));
   const rows = [
     ...SWITCHES.map((key) => ({ key, value: f.get(key) === "on" })),
-    ...NUMBERS.filter((k) => s(f, k) !== "").map((key) => ({ key, value: Number(s(f, key)) })),
+    ...NUMBERS.filter((k) => s(f, k) !== "").map((key) => {
+      const [lo, hi] = LIMITS[key] ?? [0, Number.MAX_SAFE_INTEGER];
+      return { key, value: Math.min(hi, Math.max(lo, Math.round(Number(s(f, key))))) };
+    }),
   ].filter((r) => typeof r.value === "boolean" || Number.isFinite(r.value));
-  await db.from("settings").upsert(rows);
-  await logAction(db, adminId, "setting_change", { note: "Settings updated" });
+  const changed = rows.filter((r) => old.get(r.key) !== r.value).map((r) => `${r.key}: ${String(old.get(r.key))} → ${String(r.value)}`);
+  const { error } = await db.from("settings").upsert(rows);
+  if (error) redirect("/admin/settings?saved=error");
+  await logAction(db, adminId, "setting_change", { note: changed.length ? changed.join("; ") : "Saved with no changes" });
   revalidatePath("/admin/settings");
+  redirect(`/admin/settings?saved=${changed.length || "none"}`);
 }
 export async function addBlockword(f: FormData) {
   const { db } = await requireAdmin();
