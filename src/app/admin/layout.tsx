@@ -28,7 +28,7 @@ async function Guard({ children }: { children: React.ReactNode }) {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-dvh bg-gray-50 text-sm md:flex">
-      <nav className="shrink-0 bg-brand p-3 text-white md:w-52">
+      <nav className="shrink-0 bg-brand p-3 text-white md:sticky md:top-0 md:h-dvh md:w-52 md:self-start md:overflow-y-auto">
         <p className="mb-3 text-lg font-extrabold">Admin</p>
         <ul className="flex gap-1 overflow-x-auto md:flex-col">
           {LINKS.map(([href, label]) => (

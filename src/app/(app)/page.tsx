@@ -103,7 +103,7 @@ async function Feed({ searchParams }: { searchParams: Promise<{ tab?: string }> 
           </Link>
         ))}
       </div>
-      <div className="space-y-4">
+      <div className="grid items-start gap-4 lg:grid-cols-2">
         {list.map((m, i) => (
           <div key={m.id} className="space-y-4">
             <MemeCard meme={m} laughed={laughed.has(m.id)} dataSaver={!!me?.data_saver} loggedIn={!!user} />
@@ -113,7 +113,7 @@ async function Feed({ searchParams }: { searchParams: Promise<{ tab?: string }> 
           </div>
         ))}
         {list.length === 0 && (
-          <div className="rounded-[14px] bg-lilac p-6 text-center text-sm text-gray-600">
+          <div className="rounded-[14px] bg-lilac p-6 text-center text-sm text-gray-600 lg:col-span-2">
             No memes here yet. Be the first!
             <Link href="/create" className="mt-3 block font-bold text-brand underline">Make a meme</Link>
           </div>

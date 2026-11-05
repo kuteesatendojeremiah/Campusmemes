@@ -1,23 +1,16 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { TABS, isActive } from "./nav-tabs";
 
-const TABS = [
-  { href: "/", label: "Home", icon: "🏠" },
-  { href: "/explore", label: "Explore", icon: "🧭" },
-  { href: "/create", label: "Create", icon: "+" },
-  { href: "/alerts", label: "Alerts", icon: "🔔" },
-  { href: "/profile", label: "Profile", icon: "👤" },
-];
-
+/** Phone navigation. Hidden on tablets and desktops, where SideNav takes over. */
 export default function BottomNav() {
   const path = usePathname();
-  if (["/signup", "/rules", "/privacy", "/offline"].includes(path)) return null;
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-gray-200 bg-white">
+    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden">
       <ul className="mx-auto flex max-w-md items-end justify-around px-2 pb-2 pt-1">
         {TABS.map((t) => {
-          const active = t.href === "/" ? path === "/" : path.startsWith(t.href);
+          const active = isActive(path, t.href);
           const create = t.href === "/create";
           return (
             <li key={t.href}>

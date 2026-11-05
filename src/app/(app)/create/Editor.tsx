@@ -13,7 +13,7 @@ type Topic = { id: string; name: string; emoji: string | null };
 type Challenge = { id: string; title: string; template_id: string | null };
 type Caption = { top: string; bottom: string };
 
-const SIZE_MAX = 400;
+const SIZE_MAX = 560;
 const STICKERS = ["😂", "💀", "🔥", "😭", "🤡", "👀", "🙏🏾", "💸", "🥵", "😴", "📚", "🍳", "🏍️", "⚡", "💧"];
 
 const uid = () => Math.random().toString(36).slice(2);
@@ -49,9 +49,22 @@ export default function Editor() {
   const [error, setError] = useState("");
 
   // size the canvas to the container
+  const sizeRef = useRef(340);
   useEffect(() => {
-    const w = Math.min(wrapRef.current?.clientWidth ?? 340, SIZE_MAX);
-    setSize(w);
+    const fit = () => {
+      const w = Math.min(wrapRef.current?.clientWidth ?? 340, SIZE_MAX);
+      const old = sizeRef.current;
+      if (Math.abs(w - old) < 8) return;
+      // Keep text and stickers in the same place relative to the picture when the canvas changes size.
+      const r = w / old;
+      sizeRef.current = w;
+      setSize(w);
+      setItems((c) => (c.length ? c.map((i) => ({ ...i, x: i.x * r, y: i.y * r, width: i.width * r, fontSize: i.fontSize * r })) : c));
+    };
+    sizeRef.current = Math.min(wrapRef.current?.clientWidth ?? 340, SIZE_MAX);
+    setSize(sizeRef.current);
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
   }, []);
 
   const defaultTexts = useCallback(
@@ -252,7 +265,7 @@ export default function Editor() {
   const chip = "rounded-full border border-brand px-3 py-1.5 text-xs font-semibold text-brand";
 
   return (
-    <div ref={wrapRef} className="space-y-3">
+    <div ref={wrapRef} className="mx-auto max-w-xl space-y-3">
       <div className="relative mx-auto overflow-hidden rounded-[14px] bg-lilac" style={{ width: size, height: size }}>
         <Stage
           ref={stageRef}

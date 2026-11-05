@@ -47,7 +47,7 @@ async function Detail({ params }: { params: Promise<{ id: string }> }) {
   const phone = tipsOn ? ((await admin.from("user_private").select("payout_msisdn").eq("user_id", user!.id).maybeSingle()).data?.payout_msisdn ?? "") : "";
 
   return (
-    <div className="space-y-4">
+    <div className="mx-auto max-w-xl space-y-4">
       {!user && (
         <Link href="/signup" className="block rounded-[14px] bg-accent p-3 text-center text-sm font-bold text-brand">
           Join CampusMemes to laugh, comment and make your own →
