@@ -21,7 +21,7 @@ export default async function Users({ searchParams }: { searchParams: Promise<{ 
         <button className={btnCls}>Search</button>
       </form>
       <Card>
-        <Table head={["Alias", "Phone (admin only)", "Status", "Joined", "Actions"]}>
+        <Table head={["Alias", "Phone / email (admin only)", "Status", "Joined", "Actions"]}>
           {(users ?? []).map((u) => (
             <tr key={u.id}>
               <td>{u.avatar} {u.alias}{u.is_premium ? " ⭐" : ""}</td>

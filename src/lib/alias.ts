@@ -19,3 +19,12 @@ export function normalizePhone(input: string): string | null {
   else return null;
   return n;
 }
+
+/** Canonical email used for the private identity/ban list: lower-case, no +tags, no dots for gmail. */
+export function normalizeEmail(input: string): string {
+  const [rawLocal = "", rawDomain = ""] = input.trim().toLowerCase().split("@");
+  const domain = rawDomain === "googlemail.com" ? "gmail.com" : rawDomain;
+  let local = rawLocal.split("+")[0];
+  if (domain === "gmail.com") local = local.replace(/\./g, "");
+  return `${local}@${domain}`;
+}

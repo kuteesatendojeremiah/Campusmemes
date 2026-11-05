@@ -5,12 +5,15 @@ import { createClient } from "@/lib/supabase/client";
 import { normalizePhone, randomAlias, randomAvatar } from "@/lib/alias";
 import HouseRules from "@/components/HouseRules";
 
-type Step = "phone" | "code" | "alias" | "done";
+type Step = "email" | "phone" | "code" | "alias" | "done";
 
 export default function SignUp() {
   const router = useRouter();
   const [supabase] = useState(() => createClient());
-  const [step, setStep] = useState<Step>("phone");
+  const [step, setStep] = useState<Step>("email");
+  const [isLogin, setIsLogin] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [phoneInput, setPhoneInput] = useState("");
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
@@ -40,6 +43,28 @@ export default function SignUp() {
     if (err) setError(err);
     setBusy(false);
   }
+
+  /** Email + password: sign up (new) or log in (returning). No code is sent. */
+  const emailAuth = () =>
+    run(async () => {
+      const em = email.trim();
+      if (!/^\S+@\S+\.\S+$/.test(em)) return "Enter a valid email address.";
+      if (password.length < 8) return "Password must be at least 8 characters.";
+      const res = isLogin
+        ? await supabase.auth.signInWithPassword({ email: em, password })
+        : await supabase.auth.signUp({ email: em, password });
+      if (res.error) {
+        const m = res.error.message.toLowerCase();
+        if (m.includes("invalid login")) return "Wrong email or password.";
+        if (m.includes("already registered")) return "That email already has an account. Log in instead.";
+        if (m.includes("confirmation email")) return "Sign-up is temporarily unavailable. Please try again later.";
+        return res.error.message;
+      }
+      if (!res.data.session) return "Check your email to confirm your account, then log in.";
+      const { data: p } = await supabase.from("profiles").select("id").eq("id", res.data.user!.id).maybeSingle();
+      if (p) return void router.replace("/");
+      setStep("alias");
+    });
 
   const sendCode = () =>
     run(async () => {
@@ -83,6 +108,42 @@ export default function SignUp() {
         <p className="mt-1 text-sm text-gray-600">Student-life memes. No real names.</p>
       </div>
 
+      {step === "email" && (
+        <>
+          <h2 className="text-center text-lg font-bold text-brand">{isLogin ? "Log in" : "Create your account"}</h2>
+          <label className="block text-sm font-semibold">Email</label>
+          <input
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            placeholder="you@gmail.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full rounded-[14px] border border-gray-300 p-3 text-lg"
+          />
+          <label className="block text-sm font-semibold">Password</label>
+          <input
+            type="password"
+            autoComplete={isLogin ? "current-password" : "new-password"}
+            placeholder="At least 8 characters"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && !busy && email && password && emailAuth()}
+            className="w-full rounded-[14px] border border-gray-300 p-3 text-lg"
+          />
+          <p className="text-xs text-gray-500">🔒 Private. Never shown to anyone. No code needed.</p>
+          <button className={btn} disabled={busy || !email || !password} onClick={emailAuth}>
+            {isLogin ? "Log in" : "Sign up"}
+          </button>
+          <button className="w-full text-sm text-brand underline" onClick={() => { setIsLogin(!isLogin); setError(""); }}>
+            {isLogin ? "New here? Create an account" : "Already have an account? Log in"}
+          </button>
+          <button className="w-full text-xs text-gray-600 underline" onClick={() => { setStep("phone"); setError(""); }}>
+            Use a phone number instead
+          </button>
+        </>
+      )}
+
       {step === "phone" && (
         <>
           <label className="block text-sm font-semibold">Phone number</label>
@@ -97,6 +158,9 @@ export default function SignUp() {
           <p className="text-xs text-gray-500">🔒 Private. Never shown to anyone.</p>
           <button className={btn} disabled={busy || !phoneInput} onClick={sendCode}>
             Send code
+          </button>
+          <button className="w-full text-sm text-brand underline" onClick={() => { setStep("email"); setError(""); }}>
+            Use email and password instead
           </button>
         </>
       )}

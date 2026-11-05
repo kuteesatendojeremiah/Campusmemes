@@ -3,7 +3,7 @@ export const RULES = [
   "No real names, no photos of real people, and no school names.",
   "No sexual, hateful or tribal content.",
   "Nothing that targets or bullies a person.",
-  "Posts with several reports are hidden until reviewed. Repeat rule breakers are banned by phone number.",
+  "Posts with several reports are hidden until reviewed. Repeat rule breakers are banned by phone number or email.",
 ];
 
 export default function HouseRules() {

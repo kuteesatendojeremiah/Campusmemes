@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { AVATARS } from "@/lib/alias";
+import { AVATARS, normalizeEmail } from "@/lib/alias";
 
 export async function POST(req: Request) {
   const { alias, avatar, acceptedRules } = await req.json();
@@ -13,15 +13,16 @@ export async function POST(req: Request) {
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
   const user = data.user;
-  if (!user?.phone) return NextResponse.json({ error: "Not signed in." }, { status: 401 });
+  if (!user || (!user.phone && !user.email)) return NextResponse.json({ error: "Not signed in." }, { status: 401 });
 
   const admin = createAdminClient();
-  const phone = user.phone.startsWith("+") ? user.phone : `+${user.phone}`;
+  // Private identity: the phone number, or "email:<address>" for email sign-ups. Bans match on this value.
+  const phone = user.phone ? (user.phone.startsWith("+") ? user.phone : `+${user.phone}`) : `email:${normalizeEmail(user.email!)}`;
 
   const { data: banned } = await admin.from("banned_phones").select("phone").eq("phone", phone).maybeSingle();
   if (banned) {
     await admin.auth.admin.deleteUser(user.id);
-    return NextResponse.json({ error: "This number can't be used on CampusMemes." }, { status: 403 });
+    return NextResponse.json({ error: "This account can't be used on CampusMemes." }, { status: 403 });
   }
 
   const { data: existing } = await admin.from("profiles").select("id").eq("id", user.id).maybeSingle();
