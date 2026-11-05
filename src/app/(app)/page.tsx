@@ -8,7 +8,7 @@ import { getSettings } from "@/lib/settings";
 import { isPremiumNow } from "@/lib/premium";
 
 const SELECT =
-  "id,image_url,thumb_url,laugh_count,comment_count,created_at,template_id,author:profiles(alias,avatar,avatar_frame,alias_style),topic:topics(name,emoji),challenge:challenges(title)";
+  "id,image_url,thumb_url,laugh_count,comment_count,created_at,template_id,author:profiles!author_id(alias,avatar,avatar_frame,alias_style),topic:topics(name,emoji),challenge:challenges(title)";
 
 async function Feed({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const { tab = "trending" } = await searchParams;

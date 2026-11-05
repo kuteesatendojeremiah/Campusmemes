@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CHALLENGE_SELECT, daysLeft, sponsoredOn, type ChallengeRow } from "@/lib/challenges";
 
 const MEME_SELECT =
-  "id,image_url,thumb_url,laugh_count,comment_count,created_at,template_id,author:profiles(alias,avatar),topic:topics(name,emoji),challenge:challenges(title)";
+  "id,image_url,thumb_url,laugh_count,comment_count,created_at,template_id,author:profiles!author_id(alias,avatar),topic:topics(name,emoji),challenge:challenges(title)";
 const MEDAL = ["🥇", "🥈", "🥉"];
 
 async function Body({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ sort?: string }> }) {

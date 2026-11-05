@@ -9,7 +9,7 @@ export default async function Moderation() {
   const [{ data: reports }, { data: log }] = await Promise.all([
     db
       .from("reports")
-      .select("reason,meme:memes(id,status,image_url,author:profiles(alias)),comment:comments(id,status,body,author:profiles(alias))")
+      .select("reason,meme:memes(id,status,image_url,author:profiles!author_id(alias)),comment:comments(id,status,body,author:profiles!author_id(alias))")
       .eq("status", "open"),
     db.from("moderation_actions").select("action,note,created_at,target_user,admin_id").order("created_at", { ascending: false }).limit(30),
   ]);

@@ -3,7 +3,7 @@ import { Card, H1, Table, fmtDate } from "@/components/admin-ui";
 
 export default async function Payments() {
   const { db } = await requireAdmin();
-  const { data } = await db.from("ledger").select("id,kind,amount,provider,provider_ref,status,created_at,user:profiles(alias)").order("created_at", { ascending: false }).limit(200);
+  const { data } = await db.from("ledger").select("id,kind,amount,provider,provider_ref,status,created_at,user:profiles!user_id(alias)").order("created_at", { ascending: false }).limit(200);
   return (
     <>
       <H1>Payments ledger</H1>

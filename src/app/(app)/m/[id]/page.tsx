@@ -29,13 +29,13 @@ async function Detail({ params }: { params: Promise<{ id: string }> }) {
 
   const { data: meme } = await supabase
     .from("memes")
-    .select("id,author_id,image_url,thumb_url,laugh_count,comment_count,created_at,template_id,author:profiles(alias,avatar,avatar_frame,alias_style),topic:topics(name,emoji),challenge:challenges(title)")
+    .select("id,author_id,image_url,thumb_url,laugh_count,comment_count,created_at,template_id,author:profiles!author_id(alias,avatar,avatar_frame,alias_style),topic:topics(name,emoji),challenge:challenges(title)")
     .eq("id", id)
     .maybeSingle();
   if (!meme) notFound();
 
   const [{ data: comments }, { data: mine }, { data: me }] = await Promise.all([
-    supabase.from("comments").select("id,parent_id,body,created_at,author:profiles(alias,avatar)").eq("meme_id", id).order("created_at"),
+    supabase.from("comments").select("id,parent_id,body,created_at,author:profiles!author_id(alias,avatar)").eq("meme_id", id).order("created_at"),
     user ? supabase.from("laughs").select("meme_id").eq("user_id", user.id).eq("meme_id", id).maybeSingle() : { data: null },
     user ? supabase.from("profiles").select("alias").eq("id", user.id).maybeSingle() : { data: null },
   ]);

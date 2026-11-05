@@ -8,7 +8,7 @@ export default async function Campaigns() {
     .from("campaigns")
     .select("id,brand,brief,fee,starts_at,ends_at,campaign_creators(status,payout,user:profiles(alias)),campaign_memes(meme_id)")
     .order("created_at", { ascending: false });
-  const { data: top } = await db.from("memes").select("author:profiles(alias),laugh_count").order("laugh_count", { ascending: false }).limit(10);
+  const { data: top } = await db.from("memes").select("author:profiles!author_id(alias),laugh_count").order("laugh_count", { ascending: false }).limit(10);
   const topAliases = [...new Set((top ?? []).map((t) => (t.author as unknown as { alias: string } | null)?.alias).filter(Boolean))];
 
   return (
