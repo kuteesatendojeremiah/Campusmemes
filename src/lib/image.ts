@@ -28,3 +28,14 @@ export async function compressPhoto(file: File, max = 1080): Promise<string> {
 export async function dataUrlToBlob(dataUrl: string): Promise<Blob> {
   return (await fetch(dataUrl)).blob();
 }
+
+/** Encoded meme image: WebP when the browser can make it (much smaller), else JPEG. */
+export type Encoded = { blob: Blob; ext: "webp" | "jpg"; type: string };
+
+/** `render` returns a data URL for the given mime type (e.g. the Konva stage export). */
+export async function encodeSmall(render: (mime: string) => string): Promise<Encoded> {
+  const webp = render("image/webp");
+  if (webp.startsWith("data:image/webp")) return { blob: await dataUrlToBlob(webp), ext: "webp", type: "image/webp" };
+  // Safari and some older browsers silently return PNG for WebP: fall back to JPEG.
+  return { blob: await dataUrlToBlob(render("image/jpeg")), ext: "jpg", type: "image/jpeg" };
+}

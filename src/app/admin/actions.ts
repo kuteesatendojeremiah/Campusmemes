@@ -11,7 +11,7 @@ const dt = (f: FormData, k: string) => (s(f, k) ? new Date(s(f, k)).toISOString(
 async function upload(db: Awaited<ReturnType<typeof requireAdmin>>["db"], file: FormDataEntryValue | null) {
   if (!(file instanceof File) || file.size === 0) return null;
   const path = `${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-  const { error } = await db.storage.from("assets").upload(path, file, { contentType: file.type });
+  const { error } = await db.storage.from("assets").upload(path, file, { contentType: file.type, cacheControl: "31536000" });
   if (error) throw new Error("Upload failed");
   return db.storage.from("assets").getPublicUrl(path).data.publicUrl;
 }

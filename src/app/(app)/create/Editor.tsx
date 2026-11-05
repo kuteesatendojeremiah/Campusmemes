@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Konva from "konva";
 import { Stage, Layer, Image as KImage, Text as KText, Transformer } from "react-konva";
 import { createClient } from "@/lib/supabase/client";
-import { compressPhoto, dataUrlToBlob, loadImage } from "@/lib/image";
+import { compressPhoto, encodeSmall, loadImage } from "@/lib/image";
 import { DEFAULT_FONT, PREMIUM_FONTS, isPremiumNow } from "@/lib/premium";
 
 type Item = { id: string; text: string; x: number; y: number; width: number; fontSize: number; rotation: number; kind: "text" | "sticker"; font?: string };
@@ -182,10 +182,10 @@ export default function Editor() {
     setPanel("");
   }
 
-  function exportDataUrl(width: number, quality = 0.85) {
+  function exportDataUrl(width: number, quality = 0.85, mimeType = "image/jpeg") {
     setSelected(null);
     trRef.current?.nodes([]);
-    return stageRef.current!.toDataURL({ pixelRatio: width / size, mimeType: "image/jpeg", quality });
+    return stageRef.current!.toDataURL({ pixelRatio: width / size, mimeType, quality });
   }
 
   function saveToPhone() {
@@ -203,11 +203,16 @@ export default function Editor() {
     try {
       const { data: auth } = await supabase.auth.getUser();
       const uidv = auth.user!.id;
-      const full = await dataUrlToBlob(exportDataUrl(1080));
-      const thumb = await dataUrlToBlob(exportDataUrl(360, 0.7));
+      // Small files save storage and mobile data: 720px WebP (JPEG fallback) plus a 360px thumbnail.
+      const full = await encodeSmall((mime) => exportDataUrl(720, 0.8, mime));
+      const thumb = await encodeSmall((mime) => exportDataUrl(360, 0.7, mime));
       const name = `${uidv}/${crypto.randomUUID()}`;
-      const up1 = await supabase.storage.from("memes").upload(`${name}.jpg`, full, { contentType: "image/jpeg" });
-      const up2 = await supabase.storage.from("memes").upload(`${name}_t.jpg`, thumb, { contentType: "image/jpeg" });
+      const fullPath = `${name}.${full.ext}`;
+      const thumbPath = `${name}_t.${thumb.ext}`;
+      // Filenames are unique and never change, so browsers and the CDN may cache them for a year.
+      const opts = (type: string) => ({ contentType: type, cacheControl: "31536000" });
+      const up1 = await supabase.storage.from("memes").upload(fullPath, full.blob, opts(full.type));
+      const up2 = await supabase.storage.from("memes").upload(thumbPath, thumb.blob, opts(thumb.type));
       if (up1.error || up2.error) throw new Error("upload");
       const [kind, id] = target.split(":");
       // The server checks bans, daily limits and the word filter, then saves the meme.
@@ -215,8 +220,8 @@ export default function Editor() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          imagePath: `${name}.jpg`,
-          thumbPath: `${name}_t.jpg`,
+          imagePath: fullPath,
+          thumbPath,
           topicId: kind === "topic" ? id : null,
           challengeId: kind === "challenge" ? id : null,
           templateId,
