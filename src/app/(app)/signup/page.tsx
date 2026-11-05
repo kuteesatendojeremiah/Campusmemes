@@ -166,7 +166,7 @@ export default function SignUp() {
       )}
 
       {error && <p className="rounded-[14px] bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-      <p className="text-center text-xs text-gray-400">
+      <p className="text-center text-xs text-gray-600">
         <a href="/privacy" className="underline">Privacy &amp; terms</a>
       </p>
     </main>
