@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { TABS, isActive } from "./nav-tabs";
+import InstallButton from "./InstallButton";
 
 /** Tablet and desktop navigation: a sticky sidebar. Hidden on phones, where BottomNav is used. */
 export default function SideNav() {
@@ -29,7 +30,10 @@ export default function SideNav() {
       <Link href="/create" className="mt-4 rounded-full bg-accent py-3 text-center font-extrabold text-brand shadow hover:brightness-95">
         + Create meme
       </Link>
-      <p className="mt-auto text-xs text-gray-500">Student life, anonymous memes</p>
+      <div className="mt-auto">
+        <InstallButton className="flex w-full flex-col items-start gap-0.5 rounded-xl px-3 py-2 text-left text-sm text-gray-700 hover:bg-lilac/60" />
+        <p className="mt-2 px-3 text-xs text-gray-500">Student life, anonymous memes</p>
+      </div>
     </aside>
   );
 }

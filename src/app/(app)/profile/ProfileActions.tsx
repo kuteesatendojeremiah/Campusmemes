@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { randomAlias, randomAvatar } from "@/lib/alias";
+import InstallButton from "@/components/InstallButton";
 
 const DAY = 86_400_000;
 
@@ -59,6 +60,7 @@ export default function ProfileActions({ aliasChangedAt, dataSaver }: { aliasCha
         <span>📶 Data saver</span>
         <span className={`rounded-full px-3 py-0.5 text-xs font-bold ${saver ? "bg-share text-white" : "bg-gray-200"}`}>{saver ? "On" : "Off"}</span>
       </button>
+      <InstallButton className={row} />
       <a className={row} href="/premium">⭐ Premium</a>
       <a className={row} href="/earnings">💸 Tips &amp; earnings</a>
       <a className={row} href="/rules">📜 House rules</a>
