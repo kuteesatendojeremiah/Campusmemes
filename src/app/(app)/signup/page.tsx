@@ -2,10 +2,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { normalizePhone, randomAlias, randomAvatar } from "@/lib/alias";
+import { randomAlias, randomAvatar } from "@/lib/alias";
 import HouseRules from "@/components/HouseRules";
 
-type Step = "email" | "phone" | "code" | "alias" | "done";
+type Step = "email" | "alias" | "done";
 
 export default function SignUp() {
   const router = useRouter();
@@ -14,9 +14,6 @@ export default function SignUp() {
   const [isLogin, setIsLogin] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [phoneInput, setPhoneInput] = useState("");
-  const [phone, setPhone] = useState("");
-  const [code, setCode] = useState("");
   const [alias, setAlias] = useState("");
   const [avatar, setAvatar] = useState("😎");
   const [accepted, setAccepted] = useState(false);
@@ -44,7 +41,7 @@ export default function SignUp() {
     setBusy(false);
   }
 
-  /** Email + password: sign up (new) or log in (returning). No code is sent. */
+  /** Email + password: sign up (new) or log in (returning). */
   const emailAuth = () =>
     run(async () => {
       const em = email.trim();
@@ -62,26 +59,6 @@ export default function SignUp() {
       }
       if (!res.data.session) return "Check your email to confirm your account, then log in.";
       const { data: p } = await supabase.from("profiles").select("id").eq("id", res.data.user!.id).maybeSingle();
-      if (p) return void router.replace("/");
-      setStep("alias");
-    });
-
-  const sendCode = () =>
-    run(async () => {
-      const p = normalizePhone(phoneInput);
-      if (!p) return "Enter a valid Ugandan number, e.g. 0772 123456.";
-      const { error } = await supabase.auth.signInWithOtp({ phone: p });
-      if (error) return error.message;
-      setPhone(p);
-      setStep("code");
-    });
-
-  const verify = () =>
-    run(async () => {
-      const { error } = await supabase.auth.verifyOtp({ phone, token: code.trim(), type: "sms" });
-      if (error) return "That code didn't work. Check it and try again.";
-      const { data } = await supabase.auth.getUser();
-      const { data: p } = await supabase.from("profiles").select("id").eq("id", data.user!.id).maybeSingle();
       if (p) return void router.replace("/");
       setStep("alias");
     });
@@ -131,56 +108,12 @@ export default function SignUp() {
             onKeyDown={(e) => e.key === "Enter" && !busy && email && password && emailAuth()}
             className="w-full rounded-[14px] border border-gray-300 p-3 text-lg"
           />
-          <p className="text-xs text-gray-500">🔒 Private. Never shown to anyone. No code needed.</p>
+          <p className="text-xs text-gray-500">🔒 Private. Never shown to anyone.</p>
           <button className={btn} disabled={busy || !email || !password} onClick={emailAuth}>
             {isLogin ? "Log in" : "Sign up"}
           </button>
           <button className="w-full text-sm text-brand underline" onClick={() => { setIsLogin(!isLogin); setError(""); }}>
             {isLogin ? "New here? Create an account" : "Already have an account? Log in"}
-          </button>
-          <button className="w-full text-xs text-gray-600 underline" onClick={() => { setStep("phone"); setError(""); }}>
-            Use a phone number instead
-          </button>
-        </>
-      )}
-
-      {step === "phone" && (
-        <>
-          <label className="block text-sm font-semibold">Phone number</label>
-          <input
-            type="tel"
-            inputMode="tel"
-            placeholder="0772 123456"
-            value={phoneInput}
-            onChange={(e) => setPhoneInput(e.target.value)}
-            className="w-full rounded-[14px] border border-gray-300 p-3 text-lg"
-          />
-          <p className="text-xs text-gray-500">🔒 Private. Never shown to anyone.</p>
-          <button className={btn} disabled={busy || !phoneInput} onClick={sendCode}>
-            Send code
-          </button>
-          <button className="w-full text-sm text-brand underline" onClick={() => { setStep("email"); setError(""); }}>
-            Use email and password instead
-          </button>
-        </>
-      )}
-
-      {step === "code" && (
-        <>
-          <p className="text-sm">We sent a code to {phone}.</p>
-          <input
-            inputMode="numeric"
-            maxLength={6}
-            placeholder="123456"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            className="w-full rounded-[14px] border border-gray-300 p-3 text-center text-2xl tracking-widest"
-          />
-          <button className={btn} disabled={busy || code.length < 4} onClick={verify}>
-            Verify
-          </button>
-          <button className="w-full text-sm text-brand underline" onClick={() => setStep("phone")}>
-            Use a different number
           </button>
         </>
       )}
