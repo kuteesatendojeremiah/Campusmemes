@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { Suspense } from "react";
 import Page from "@/components/Page";
 import { createClient } from "@/lib/supabase/server";
@@ -5,6 +6,7 @@ import ProfileActions from "./ProfileActions";
 import { isPremiumNow } from "@/lib/premium";
 
 async function ProfileBody() {
+  await connection();
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return null;

@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -7,6 +8,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import CampaignAnswer from "./CampaignAnswer";
 
 async function Body({ params }: { params: Promise<{ id: string }> }) {
+  await connection();
   const { id } = await params;
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();

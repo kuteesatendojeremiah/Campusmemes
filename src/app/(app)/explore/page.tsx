@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { Suspense } from "react";
 import Link from "next/link";
 import Page from "@/components/Page";
@@ -8,6 +9,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { currentChallenge, daysLeft, sponsoredOn } from "@/lib/challenges";
 
 async function Body() {
+  await connection();
   // Make sure finished challenges have their winners awarded (the hourly job does this too).
   await createAdminClient().rpc("finalize_challenges");
 

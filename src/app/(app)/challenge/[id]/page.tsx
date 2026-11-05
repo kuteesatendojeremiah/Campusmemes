@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -11,6 +12,7 @@ const MEME_SELECT =
 const MEDAL = ["🥇", "🥈", "🥉"];
 
 async function Body({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ sort?: string }> }) {
+  await connection();
   const { id } = await params;
   const { sort = "top" } = await searchParams;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();

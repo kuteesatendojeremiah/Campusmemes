@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { Suspense } from "react";
 import Page from "@/components/Page";
 import { createClient } from "@/lib/supabase/server";
@@ -8,6 +9,7 @@ import { timeAgo } from "@/lib/time";
 import EarningsClient from "./EarningsClient";
 
 async function Body() {
+  await connection();
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return null;

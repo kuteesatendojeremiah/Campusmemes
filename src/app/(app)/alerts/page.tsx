@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { Suspense } from "react";
 import Link from "next/link";
 import Page from "@/components/Page";
@@ -14,6 +15,7 @@ const TEXT: Record<string, string> = {
 };
 
 async function List() {
+  await connection();
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return null;

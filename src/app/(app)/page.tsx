@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { Suspense } from "react";
 import Link from "next/link";
 import Page from "@/components/Page";
@@ -11,6 +12,7 @@ const SELECT =
   "id,image_url,thumb_url,laugh_count,comment_count,created_at,template_id,author:profiles!author_id(alias,avatar,avatar_frame,alias_style),topic:topics(name,emoji),challenge:challenges(title)";
 
 async function Feed({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+  await connection();
   const { tab = "trending" } = await searchParams;
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
