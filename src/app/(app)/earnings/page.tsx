@@ -15,6 +15,9 @@ async function Body() {
   if (!auth.user) return null;
   const uid = auth.user.id;
   const db = createAdminClient();
+  if (!(await getSettings(db)).tipsOn) {
+    return <p className="rounded-[14px] bg-lilac p-4 text-center text-sm text-gray-600">Tips &amp; earnings open soon. Check back later.</p>;
+  }
   const [s, balance, tips, withdrawals, { data: priv }] = await Promise.all([
     getSettings(db),
     db.rpc("creator_balance", { p_user: uid }),
