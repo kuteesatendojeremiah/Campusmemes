@@ -217,7 +217,7 @@ export default function Editor() {
       const { data: auth } = await supabase.auth.getUser();
       const uidv = auth.user!.id;
       // Small files save storage and mobile data: 720px WebP (JPEG fallback) plus a 360px thumbnail.
-      const full = await encodeSmall((mime) => exportDataUrl(720, 0.8, mime));
+      const full = await encodeSmall((mime) => exportDataUrl(720, 0.7, mime));
       const thumb = await encodeSmall((mime) => exportDataUrl(360, 0.7, mime));
       const name = `${uidv}/${crypto.randomUUID()}`;
       const fullPath = `${name}.${full.ext}`;
